@@ -1,0 +1,46 @@
+BasedOnStyle: Google  # Базируемся на стиле Google, но переопределяем некоторые вещи под себя.
+
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 120
+
+BreakBeforeBraces: Allman
+# Стиль расстановки фигурных скобок. Allman - это когда скобка всегда на новой строке.
+# void func()
+# {
+#     ...
+# }
+
+PointerAlignment: Right
+# int *p;
+
+AllowShortFunctionsOnASingleLine: None
+# Запрещаем "сливать" короткие функции в одну строку.
+
+SpaceAfterCStyleCast: false
+# (int)variable;
+
+SpaceBeforeParens: ControlStatements
+# if (condition) { ... }
+# myFunction(argument);
+
+SpacesInParentheses: false
+# false myFunction(arg1, arg2); || if true || myFunction( arg1, arg2 );
+
+SortIncludes: true 
+IncludeBlocks: Regroup
+# Includes
+
+AccessModifierOffset: -4
+# Class
+
+AllowShortBlocksOnASingleLine: false
+# if (condition)
+# {
+#     return;
+# }
+
+# Ctrl + Shift + I
+# 
+# 
