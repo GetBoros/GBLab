@@ -1,8 +1,67 @@
-#include <raylib.h>
+//------------------------------------------------------------------------------------------------------------
+#include "main.hpp"
+//------------------------------------------------------------------------------------------------------------
 
-#include "Config.hpp"
+// AsHUD
+AsHUD::~AsHUD()
+{
+}
+//------------------------------------------------------------------------------------------------------------
+AsHUD::AsHUD()
+{
+}
+//------------------------------------------------------------------------------------------------------------
+void AsHUD::Init()
+{
+    bool isDragging = false;
+    const int screenWidth = 800;
+    const int screenHeight = 450;
+    Vector2 dragOffset = {0.0f, 0.0f};
 
-Font Init_Load_Font_Ex()
+    SetConfigFlags(FLAG_WINDOW_TRANSPARENT | FLAG_WINDOW_UNDECORATED);
+    InitWindow(screenWidth, screenHeight, "GBLab - Плавное прозрачное окно!");
+    SetWindowPosition(0, 0);
+
+    SetTargetFPS(60);
+
+    Font cyrillicFont = Init_Font();
+
+    while (!WindowShouldClose())
+    {
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+        {
+            isDragging = true;
+
+            dragOffset.x = GetMousePosition().x;
+            dragOffset.y = GetMousePosition().y;
+        }
+
+        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) isDragging = false;
+
+        if (isDragging)
+        {
+            Vector2 currentMousePos = GetMousePosition();
+            Vector2 windowPos = GetWindowPosition();
+
+            SetWindowPosition(static_cast<int>(windowPos.x + currentMousePos.x - dragOffset.x),
+                              static_cast<int>(windowPos.y + currentMousePos.y - dragOffset.y));
+        }
+
+        BeginDrawing();
+
+        ClearBackground(BLANK);
+
+        DrawTextEx(cyrillicFont, "Теперь точно работает как надо!", {190, 200}, 20, 1, LIME);
+        DrawTextEx(cyrillicFont, "Никакого дрожания и убегания.", {240, 230}, 16, 1, GRAY);
+
+        EndDrawing();
+    }
+
+    UnloadFont(cyrillicFont);
+    CloseWindow();
+}
+//------------------------------------------------------------------------------------------------------------
+Font AsHUD::Init_Font()
 {
     const char *fontPath = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
     int codepoints[256];
@@ -22,61 +81,15 @@ Font Init_Load_Font_Ex()
 
     return LoadFontEx(fontPath, 96, codepoints, count);
 }
+//------------------------------------------------------------------------------------------------------------
 
+// MAIN
 int main()
 {
-    bool isDragging = false;
-    int *ptr = 0;
-    const int screenWidth = 800;
-    const int screenHeight = 450;
-    Vector2 dragOffset = {0.0f, 0.0f};
+    AsHUD HUD;
 
-    SetConfigFlags(FLAG_WINDOW_TRANSPARENT | FLAG_WINDOW_UNDECORATED);
-    InitWindow(screenWidth, screenHeight, "GBLab - Плавное прозрачное окно!");
-    SetWindowPosition(0, 0);
-
-    if (ptr != 0)
-    {
-        /* code */
-    }
-
-    SetTargetFPS(60);
-
-    Font cyrillicFont = Init_Load_Font_Ex();
-
-    while (!WindowShouldClose())
-    {
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-        {
-            isDragging = true;
-
-            dragOffset.x = GetMousePosition().x;
-            dragOffset.y = GetMousePosition().y;
-        }
-
-        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) isDragging = false;
-
-        if (isDragging)
-        {
-            Vector2 currentMousePos = GetMousePosition();
-            Vector2 windowPos = GetWindowPosition();
-
-            SetWindowPosition(windowPos.x + currentMousePos.x - dragOffset.x,
-                              windowPos.y + currentMousePos.y - dragOffset.y);
-        }
-
-        BeginDrawing();
-
-        ClearBackground(BLANK);
-
-        DrawTextEx(cyrillicFont, "Теперь точно работает как надо!", {190, 200}, 20, 1, LIME);
-        DrawTextEx(cyrillicFont, "Никакого дрожания и убегания.", {240, 230}, 16, 1, GRAY);
-
-        EndDrawing();
-    }
-
-    UnloadFont(cyrillicFont);
-    CloseWindow();
+    HUD.Init();
 
     return 0;
 }
+//------------------------------------------------------------------------------------------------------------

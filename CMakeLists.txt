@@ -5,6 +5,7 @@ project(HelloWorld VERSION 1.0)  # Project name and version
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)  # compile_commands.json for Clang-Tidy.
 set(CMAKE_FETCHCONTENT_SOURCE_DIR_FETCHCONTENT ${CMAKE_BINARY_DIR}/fetchcontent)  # put to build/fetchcontent
 #-------------------------------------------------------------------------------------------------------------
 find_package(X11)# check if OS has libs and ask user to install

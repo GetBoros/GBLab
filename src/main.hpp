@@ -1,17 +1,17 @@
 //------------------------------------------------------------------------------------------------------------
 #pragma once
 //------------------------------------------------------------------------------------------------------------
-#include <format>
-#include <iostream>
-#include <string>
-#include <string_view>
+#include "Config.hpp"
 //------------------------------------------------------------------------------------------------------------
-namespace Utils
+class AsHUD
 {
-inline std::string GetWelcomeMessage()
-{
-    return std::format("Welcome to our project!");
-}
+public:
+    ~AsHUD();
+    AsHUD();
 
-}  // namespace Utils
+    void Init();
+    Font Init_Font();
+
+private:
+};
 //------------------------------------------------------------------------------------------------------------
