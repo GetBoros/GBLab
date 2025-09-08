@@ -7,6 +7,8 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)  # compile_commands.json for Clang-Tidy.
 set(CMAKE_FETCHCONTENT_SOURCE_DIR_FETCHCONTENT ${CMAKE_BINARY_DIR}/fetchcontent)  # put to build/fetchcontent
+
+file(GLOB_RECURSE PROJECT_SOURCES "src/*.cpp")  # find all .cpp in folder src, and save to PROJECT_SOURCES
 #-------------------------------------------------------------------------------------------------------------
 find_package(X11)# check if OS has libs and ask user to install
 
@@ -33,9 +35,12 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 #-------------------------------------------------------------------------------------------------------------
-add_executable(HelloWorld 
-    src/main.cpp  # main.cpp to main.o
-    src/Config.cpp)
+add_executable(HelloWorld ${PROJECT_SOURCES} )
+
+target_include_directories(HelloWorld PUBLIC ${CMAKE_SOURCE_DIR}/src)  # where find includes src folder
+
+# add dependecies, macros ASSETS_PATH has absolute path to assets folder
+target_compile_definitions(HelloWorld PUBLIC "ASSETS_PATH=\"${CMAKE_SOURCE_DIR}/assets\"")
 
 target_link_libraries(HelloWorld PRIVATE raylib)
 #-------------------------------------------------------------------------------------------------------------
