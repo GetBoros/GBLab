@@ -8,12 +8,16 @@
 
 HubState::HubState(Application& app) : _app(app)
 {
-    // --- Создаем нашу иконку ---
-    // Формируем полный путь к файлу иконки
-    const std::string iconPath = std::format("{}/icons/icon_clicker.png", ASSETS_PATH);
+    // --- Создаем наши иконки и добавляем их в вектор ---
 
-    // Создаем объект Icon и передаем владение в наш unique_ptr
-    _clickerIcon = std::make_unique<Icon>(iconPath, Vector2{100.0f, 100.0f});
+    // 1. Иконка Кликера
+    const std::string clickerIconPath = std::format("{}/icons/icon_clicker.png", ASSETS_PATH);
+    _icons.push_back(std::make_unique<Icon>(clickerIconPath, Vector2{100.0f, 150.0f}));
+
+    // 2. Иконка Выхода
+    const std::string exitIconPath = std::format("{}/icons/icon_exit.png", ASSETS_PATH);
+    // Разместим ее правее первой
+    _icons.push_back(std::make_unique<Icon>(exitIconPath, Vector2{300.0f, 150.0f}));
 
     TraceLog(LOG_INFO, "HubState Constructed");
 }
@@ -26,20 +30,30 @@ HubState::~HubState()
 
 void HubState::HandleInput()
 {
+    int clickerIndex = static_cast<int>(HubIcon::Clicker);
+    int exitIndex = static_cast<int>(HubIcon::Exit);
+
     if (IsKeyPressed(KEY_Q))
     {
         _app.PopState();
     }
 
-    // --- Проверяем клик по иконке ---
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
     {
-        if (_clickerIcon->IsClicked(GetMousePosition()))
+        // Проверяем клик по каждой иконке
+
+        // Клик по иконке Кликера (она у нас первая в векторе, индекс 0)
+        if (_icons[clickerIndex]->IsClicked(GetMousePosition()))
         {
-            // Если кликнули, выводим сообщение в лог
-            TraceLog(LOG_INFO, "Clicker icon has been clicked!");
-            // В будущем здесь будет переход в другое состояние:
-            // _app.PushState(std::make_unique<ClickerState>(_app));
+            TraceLog(LOG_INFO, "Clicker icon clicked! Should transition to ClickerState.");
+            // Здесь будет переход в состояние кликера
+        }
+
+        // Клик по иконке Выхода (вторая в векторе, индекс 1)
+        if (_icons[exitIndex]->IsClicked(GetMousePosition()))
+        {
+            TraceLog(LOG_INFO, "Exit icon clicked! Popping HubState.");
+            _app.PopState();  // Просто выходим из текущего состояния. Т.к. оно одно, приложение закроется.
         }
     }
 }
@@ -51,10 +65,12 @@ void HubState::Update(float deltaTime)
 
 void HubState::Draw()
 {
-    // Рисуем текст
-    DrawTextEx(_app.GetFont(), "Кликни по иконке!", {230, 200}, 32, 2, RAYWHITE);
-    DrawTextEx(_app.GetFont(), "Нажми Q для выхода", {260, 240}, 20, 1, LIGHTGRAY);
+    // Рисуем текст-подсказку
+    DrawTextEx(_app.GetFont(), "Добро пожаловать в GBLab!", {200, 50}, 32, 2, RAYWHITE);
 
-    // --- Рисуем нашу иконку ---
-    _clickerIcon->Draw();
+    // Рисуем все иконки из вектора
+    for (const auto& icon : _icons)
+    {
+        icon->Draw();
+    }
 }

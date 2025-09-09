@@ -5,9 +5,16 @@
 #include <raylib.h>
 
 #include <memory>  // Для std::unique_ptr
+#include <vector>  // Подключаем std::vector
 
 #include "Components/Icon.hpp"  // Подключаем наш новый компонент
 #include "States/State.hpp"
+
+enum class HubIcon
+{
+    Clicker,
+    Exit
+};
 
 class Application;
 
@@ -26,5 +33,5 @@ private:
 
     // Храним нашу иконку в умном указателе.
     // Это гарантирует, что она будет правильно создана и уничтожена вместе с HubState.
-    std::unique_ptr<Icon> _clickerIcon;
+    std::vector<std::unique_ptr<Icon>> _icons;
 };
