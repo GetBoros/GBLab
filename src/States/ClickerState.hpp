@@ -6,7 +6,7 @@
 
 #include "States/State.hpp"
 
-class Application;  // Опережающее объявление
+class Application;
 
 class ClickerState final : public State
 {
@@ -14,11 +14,16 @@ public:
     ClickerState(Application& app);
     ~ClickerState() override;
 
-    // Реализуем "контракт" базового класса
     void HandleInput() override;
     void Update(float deltaTime) override;
     void Draw() override;
 
 private:
-    Application& _app;  // Ссылка на главный класс приложения
+    Application& _app;
+
+    // --- Новые поля для логики кликера ---
+
+    long long _clickCount;   // Используем long long на случай, если ты очень увлечешься :)
+    Rectangle _clickButton;  // Прямоугольник, описывающий нашу кнопку
+    Color _buttonColor;      // Цвет кнопки, который мы будем менять
 };
