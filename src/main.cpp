@@ -1,9 +1,10 @@
 #include "Core/Application.hpp"
+#include "Core/Config/Config.hpp"
 
 int main()
 {
     // Создаем экземпляр нашего приложения
-    Application app(800, 450, "GBLab");
+    Application app(AsConfig::WindowWidth, AsConfig::WindowHeight, AsConfig::WindowTitle);
 
     // Запускаем главный цикл
     app.Run();

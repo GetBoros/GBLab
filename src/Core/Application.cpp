@@ -5,6 +5,7 @@
 #include <format>
 #include <vector>
 
+#include "Core/Config/Config.hpp"
 #include "States/HubState.hpp"  // Подключаем наше первое конкретное состояние
 
 Application::Application(int width, int height, const std::string& title)

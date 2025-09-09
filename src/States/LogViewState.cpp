@@ -5,12 +5,13 @@
 #include <format>
 
 #include "Core/Application.hpp"
+#include "Core/Config/Config.hpp"
 
 LogViewState::LogViewState(Application& app) : _app(app)
 {
     // Создаем кнопку "Добавить" в правом верхнем углу
-    Rectangle buttonBounds = {650.0f, 20.0f, 130.0f, 40.0f};
-    _addButton = std::make_unique<Button>(buttonBounds, "Добавить", 20, _app.GetFont());
+    Rectangle buttonBounds = {AsConfig::WindowWidth - 150.0f, 20.0f, 130.0f, 40.0f};
+    _addButton = std::make_unique<Button>(buttonBounds, "Добавить", AsConfig::DefaultFontSize, _app.GetFont());
 
     // Добавим пару сообщений для старта
     AddMessage();

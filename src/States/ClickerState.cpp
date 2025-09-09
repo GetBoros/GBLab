@@ -6,16 +6,18 @@
 #include <string>
 
 #include "Core/Application.hpp"
+#include "Core/Config/Config.hpp"
 
 ClickerState::ClickerState(Application& app) : _app(app), _clickCount(0)
 {
     // Определяем геометрию кнопки
     const float buttonWidth = 200.0f;
     const float buttonHeight = 100.0f;
-    Rectangle buttonBounds = {(800 - buttonWidth) / 2, (450 - buttonHeight) / 2, buttonWidth, buttonHeight};
+    Rectangle buttonBounds = {(AsConfig::WindowWidth - buttonWidth) / 2, (AsConfig::WindowHeight - buttonHeight) / 2,
+                              buttonWidth, buttonHeight};
 
     // Создаем наш объект Button одной строкой!
-    _clickerButton = std::make_unique<Button>(buttonBounds, "Кликай!", 20, _app.GetFont());
+    _clickerButton = std::make_unique<Button>(buttonBounds, "Кликай!", AsConfig::DefaultFontSize, _app.GetFont());
 
     TraceLog(LOG_INFO, "ClickerState Constructed");
 }
@@ -50,7 +52,7 @@ void ClickerState::Update(float deltaTime)
 // Draw тоже стал намного чище
 void ClickerState::Draw()
 {
-    DrawRectangle(0, 0, 800, 450, Fade(BLACK, 0.3f));
+    DrawRectangle(0, 0, AsConfig::WindowWidth, AsConfig::WindowHeight, Fade(BLACK, 0.3f));
 
     // Просто просим кнопку нарисовать себя
     _clickerButton->Draw();
