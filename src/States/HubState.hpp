@@ -4,14 +4,16 @@
 
 #include <raylib.h>
 
+#include <memory>  // Для std::unique_ptr
+
+#include "Components/Icon.hpp"  // Подключаем наш новый компонент
 #include "States/State.hpp"
 
-class Application;  // Опережающее объявление. Мы говорим "такой класс есть", чтобы использовать указатель на него.
+class Application;
 
 class HubState final : public State
 {
 public:
-    // Конструктор теперь принимает указатель на Application
     HubState(Application& app);
     ~HubState() override;
 
@@ -20,5 +22,9 @@ public:
     void Draw() override;
 
 private:
-    Application& _app;  // Ссылка на главный класс приложения
+    Application& _app;
+
+    // Храним нашу иконку в умном указателе.
+    // Это гарантирует, что она будет правильно создана и уничтожена вместе с HubState.
+    std::unique_ptr<Icon> _clickerIcon;
 };
