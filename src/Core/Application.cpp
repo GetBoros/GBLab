@@ -12,7 +12,7 @@ Application::Application(int width, int height, const std::string& title)
 {
     SetConfigFlags(FLAG_WINDOW_TRANSPARENT | FLAG_WINDOW_UNDECORATED | FLAG_WINDOW_TOPMOST);
     InitWindow(_screenWidth, _screenHeight, title.c_str());
-    SetTargetFPS(60);
+    SetTargetFPS(30);
 
     LoadAssets();
 

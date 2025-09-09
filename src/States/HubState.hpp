@@ -7,7 +7,8 @@
 #include <memory>  // Для std::unique_ptr
 #include <vector>  // Подключаем std::vector
 
-#include "Components/Icon.hpp"  // Подключаем наш новый компонент
+#include "Components/Icon.hpp"
+#include "States/ClickerState.hpp"
 #include "States/State.hpp"
 
 enum class HubIcon

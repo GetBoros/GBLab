@@ -45,8 +45,9 @@ void HubState::HandleInput()
         // Клик по иконке Кликера (она у нас первая в векторе, индекс 0)
         if (_icons[clickerIndex]->IsClicked(GetMousePosition()))
         {
-            TraceLog(LOG_INFO, "Clicker icon clicked! Should transition to ClickerState.");
-            // Здесь будет переход в состояние кликера
+            TraceLog(LOG_INFO, "Clicker icon clicked! Pushing ClickerState.");
+            _app.PushState(std::make_unique<ClickerState>(_app));  // Вот он, переход!
+                                                                   // Здесь будет переход в состояние кликера
         }
 
         // Клик по иконке Выхода (вторая в векторе, индекс 1)
