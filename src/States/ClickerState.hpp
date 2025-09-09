@@ -4,6 +4,9 @@
 
 #include <raylib.h>
 
+#include <memory>  // Для std::unique_ptr
+
+#include "Components/Button.hpp"  // Подключаем наш новый компонент
 #include "States/State.hpp"
 
 class Application;
@@ -20,10 +23,8 @@ public:
 
 private:
     Application& _app;
+    long long _clickCount;
 
-    // --- Новые поля для логики кликера ---
-
-    long long _clickCount;   // Используем long long на случай, если ты очень увлечешься :)
-    Rectangle _clickButton;  // Прямоугольник, описывающий нашу кнопку
-    Color _buttonColor;      // Цвет кнопки, который мы будем менять
+    // Заменяем Rectangle и Color на один умный указатель на нашу кнопку!
+    std::unique_ptr<Button> _clickerButton;
 };

@@ -23,7 +23,7 @@ public:
     void PopState();
 
     // Сделаем шрифт публичным, чтобы состояния могли его использовать
-    Font GetFont() const
+    Font& GetFont()
     {
         return _cyrillicFont;
     }
