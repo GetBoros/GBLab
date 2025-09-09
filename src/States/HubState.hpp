@@ -14,6 +14,7 @@
 enum class HubIcon
 {
     Clicker,
+    Logger,  // <--- Добавляем новую иконку
     Exit
 };
 

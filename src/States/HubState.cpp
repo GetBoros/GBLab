@@ -5,19 +5,21 @@
 #include <format>  // Для std::format
 
 #include "Core/Application.hpp"
+#include "States/LogViewState.hpp"
 
 HubState::HubState(Application& app) : _app(app)
 {
-    // --- Создаем наши иконки и добавляем их в вектор ---
-
     // 1. Иконка Кликера
     const std::string clickerIconPath = std::format("{}/icons/icon_clicker.png", ASSETS_PATH);
     _icons.push_back(std::make_unique<Icon>(clickerIconPath, Vector2{100.0f, 150.0f}));
 
-    // 2. Иконка Выхода
+    // 2. Иконка Логгера (НОВАЯ)
+    const std::string loggerIconPath = std::format("{}/icons/icon_logger.png", ASSETS_PATH);
+    _icons.push_back(std::make_unique<Icon>(loggerIconPath, Vector2{300.0f, 150.0f}));
+
+    // 3. Иконка Выхода
     const std::string exitIconPath = std::format("{}/icons/icon_exit.png", ASSETS_PATH);
-    // Разместим ее правее первой
-    _icons.push_back(std::make_unique<Icon>(exitIconPath, Vector2{300.0f, 150.0f}));
+    _icons.push_back(std::make_unique<Icon>(exitIconPath, Vector2{500.0f, 150.0f}));  // Сдвинем ее правее
 
     TraceLog(LOG_INFO, "HubState Constructed");
 }
@@ -40,21 +42,26 @@ void HubState::HandleInput()
 
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
     {
-        // Проверяем клик по каждой иконке
+        int clickerIndex = static_cast<int>(HubIcon::Clicker);
+        int loggerIndex = static_cast<int>(HubIcon::Logger);  // <--- Добавляем
+        int exitIndex = static_cast<int>(HubIcon::Exit);
 
-        // Клик по иконке Кликера (она у нас первая в векторе, индекс 0)
         if (_icons[clickerIndex]->IsClicked(GetMousePosition()))
         {
-            TraceLog(LOG_INFO, "Clicker icon clicked! Pushing ClickerState.");
-            _app.PushState(std::make_unique<ClickerState>(_app));  // Вот он, переход!
-                                                                   // Здесь будет переход в состояние кликера
+            _app.PushState(std::make_unique<ClickerState>(_app));
         }
 
-        // Клик по иконке Выхода (вторая в векторе, индекс 1)
+        // --- НОВАЯ ЛОГИКА ---
+        if (_icons[loggerIndex]->IsClicked(GetMousePosition()))
+        {
+            TraceLog(LOG_INFO, "Logger icon clicked! Pushing LogViewState.");
+            _app.PushState(std::make_unique<LogViewState>(_app));
+        }
+        // ---------------------
+
         if (_icons[exitIndex]->IsClicked(GetMousePosition()))
         {
-            TraceLog(LOG_INFO, "Exit icon clicked! Popping HubState.");
-            _app.PopState();  // Просто выходим из текущего состояния. Т.к. оно одно, приложение закроется.
+            _app.PopState();
         }
     }
 }
