@@ -3,6 +3,7 @@
 #include "States/ClickerState.hpp"
 
 #include <format>
+#include <fstream>
 #include <string>
 
 #include "Core/Application.hpp"
@@ -18,6 +19,20 @@ ClickerState::ClickerState(Application &app, StateManager &stateManager)
     Rectangle buttonBounds = {(AsConfig::WindowWidth - buttonWidth) / 2, (AsConfig::WindowHeight - buttonHeight) / 2,
                               buttonWidth, buttonHeight};
 
+    std::ifstream saveFile(AsConfig::GetClickerSavePath());
+    // Проверяем, открылся ли файл и не пуст ли он
+    if (saveFile.is_open())
+    {
+        // Читаем из файла в нашу переменную, как будто это cin
+        saveFile >> _clickCount;
+        TraceLog(LOG_INFO, "Clicker save loaded. Score: %lld", _clickCount);
+    }
+    else
+    {
+        // Файла нет или не удалось открыть - это нормально при первом запуске.
+        // Просто начинаем с нуля.
+        TraceLog(LOG_INFO, "No clicker save file found. Starting new game.");
+    }
     // Создаем наш объект Button одной строкой!
     _clickerButton = std::make_unique<Button>(buttonBounds, "Кликай!", AsConfig::DefaultFontSize, _app.GetFont());
 
@@ -26,6 +41,25 @@ ClickerState::ClickerState(Application &app, StateManager &stateManager)
 
 ClickerState::~ClickerState()
 {
+    // -- -ЛОГИКА СОХРАНЕНИЯ-- -
+    // Открываем файл для записи. Если файла нет, он будет создан.
+    // Если есть, его содержимое будет перезаписано.
+    std::ofstream saveFile(AsConfig::GetClickerSavePath());
+
+    // Проверяем, удалось ли открыть файл для записи
+    if (saveFile.is_open())
+    {
+        // Записываем в файл наш счетчик, как будто это cout
+        saveFile << _clickCount;
+        TraceLog(LOG_INFO, "Clicker score saved: %lld", _clickCount);
+    }
+    else
+    {
+        // Если не удалось - выводим ошибку. Это уже нештатная ситуация.
+        TraceLog(LOG_ERROR, "Failed to open save file for writing!");
+    }
+    // saveFile закроется автоматически при выходе из деструктора
+
     TraceLog(LOG_INFO, "ClickerState Destructed");
 }
 

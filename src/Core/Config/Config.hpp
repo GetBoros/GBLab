@@ -16,4 +16,12 @@ public:
 
     // --- Шрифты ---
     static inline constexpr int DefaultFontSize = 20;
+
+    // --- Пути к файлам ---
+    static std::string GetClickerSavePath()
+    {
+        // ASSETS_PATH - это макрос из CMake, который превратится в "/path/to/GBLab/assets"
+        // Мы просто добавляем к нему хвост.
+        return std::string(ASSETS_PATH) + "/saves/clicker.sav";
+    }
 };

@@ -1,6 +1,6 @@
-// src/Core/Application.cpp
-
 #include "Core/Application.hpp"
+
+#include <unistd.h>  // Для функции getcwd
 
 #include <format>
 #include <vector>
@@ -8,7 +8,7 @@
 #include "Core/Config/Config.hpp"
 #include "States/HubState.hpp"
 
-Application::Application(int width, int height, const std::string& title)
+Application::Application(int width, int height, const std::string &title)
     : _screenWidth(width), _screenHeight(height), _cyrillicFont{}
 {
     // ... InitWindow, SetTargetFPS ...
@@ -28,6 +28,16 @@ Application::Application(int width, int height, const std::string& title)
     // добавления первого состояния. Это "переложит" HubState из временного
     // хранилища в основной стек до начала главного цикла.
     _stateManager->ProcessStateChanges();
+
+    char currentPath[1024];
+    if (getcwd(currentPath, sizeof(currentPath)) != nullptr)
+    {
+        TraceLog(LOG_WARNING, "Current Working Directory is: %s", currentPath);
+    }
+    else
+    {
+        TraceLog(LOG_ERROR, "Failed to get current working directory!");
+    }
 }
 
 Application::~Application()
@@ -79,8 +89,6 @@ void Application::UnloadAssets()
 {
     UnloadFont(_cyrillicFont);
 }
-
-// --- Главное изменение: обновляем метод Run() ---
 
 void Application::Run()
 {

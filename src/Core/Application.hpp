@@ -1,5 +1,3 @@
-// src/Core/Application.hpp
-
 #pragma once
 
 #include <raylib.h>
@@ -8,9 +6,6 @@
 #include <string>
 
 #include "Core/StateManager.hpp"  // <--- Меняем State.hpp на StateManager.hpp
-
-// Больше не нужен stack
-// class State; // Больше не нужно
 
 class Application
 {
