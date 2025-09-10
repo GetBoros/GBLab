@@ -6,52 +6,47 @@
 #include <vector>
 
 #include "Core/Config/Config.hpp"
-#include "States/HubState.hpp"  // Подключаем наше первое конкретное состояние
+#include "States/HubState.hpp"
 
 Application::Application(int width, int height, const std::string& title)
     : _screenWidth(width), _screenHeight(height), _cyrillicFont{}
 {
+    // ... InitWindow, SetTargetFPS ...
     SetConfigFlags(FLAG_WINDOW_TRANSPARENT | FLAG_WINDOW_UNDECORATED | FLAG_WINDOW_TOPMOST);
     InitWindow(_screenWidth, _screenHeight, title.c_str());
-    SetTargetFPS(30);
+    SetTargetFPS(60);
 
     LoadAssets();
 
-    // --- Инициализируем машину состояний ---
-    // Сразу после запуска "включаем" наш первый "канал" - HubState
-    // PushState(std::make_unique<HubState>());
-    PushState(std::make_unique<HubState>(*this));
+    // Создаем StateManager
+    _stateManager = std::make_unique<StateManager>(*this);
+    // И сразу добавляем в него начальное состояние
+    _stateManager->PushState(std::make_unique<HubState>(*this, *_stateManager));
+
+    // --- ВОТ РЕШЕНИЕ ---
+    // Принудительно обрабатываем отложенные изменения СРАЗУ ПОСЛЕ
+    // добавления первого состояния. Это "переложит" HubState из временного
+    // хранилища в основной стек до начала главного цикла.
+    _stateManager->ProcessStateChanges();
 }
 
 Application::~Application()
 {
-    // Очищаем стек состояний перед выходом
-    while (!_states.empty())
-    {
-        PopState();
-    }
+    // --- ПРАВИЛЬНЫЙ ПОРЯДОК ---
 
+    // 1. Сначала уничтожаем StateManager.
+    // Это приведет к вызову деструкторов всех активных состояний,
+    // которые, в свою очередь, вызовут деструкторы всех иконок и кнопок,
+    // и все текстуры будут корректно выгружены, ПОКА ГРАФИЧЕСКИЙ КОНТЕКСТ ЕЩЕ ЖИВ.
+    _stateManager.reset();  // У unique_ptr есть метод reset() для явного уничтожения объекта.
+
+    // 2. Затем выгружаем глобальные ресурсы самого приложения (шрифт).
     UnloadAssets();
+
+    // 3. И только в самом конце, когда все наши ресурсы освобождены,
+    // мы закрываем окно и уничтожаем графический контекст.
     CloseWindow();
 }
-
-// --- Реализация новых методов ---
-
-void Application::PushState(std::unique_ptr<State> state)
-{
-    _states.push(std::move(state));  // Перемещаем владение указателем в стек
-}
-
-void Application::PopState()
-{
-    if (!_states.empty())
-    {
-        _states.pop();  // unique_ptr автоматически вызовет деструктор и освободит память
-    }
-}
-
-// ... методы LoadAssets и UnloadAssets остаются без изменений ...
-// (просто скопируй их из своей текущей версии)
 
 void Application::LoadAssets()
 {
@@ -95,40 +90,13 @@ void Application::Run()
     bool isDragging = false;
     Vector2 dragOffset = {0.0f, 0.0f};
 
-    while (!WindowShouldClose() && !_states.empty())  // Цикл работает, пока есть состояния
+    while (!WindowShouldClose() && !_stateManager->IsEmpty())
     {
-        // Получаем указатель на текущее активное состояние (верхнее в стеке)
-        State* currentState = _states.top().get();
+        // 1. Применяем все отложенные изменения состояний
+        _stateManager->ProcessStateChanges();
 
-        // --- Логика обновления ---
-
-        // Глобальная логика (перетаскивание)
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-        {
-            isDragging = true;
-            dragOffset = GetMousePosition();
-        }
-        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON))
-        {
-            isDragging = false;
-        }
-        if (isDragging)
-        {
-            Vector2 currentMousePos = GetMousePosition();
-            windowPos.x += currentMousePos.x - dragOffset.x;
-            windowPos.y += currentMousePos.y - dragOffset.y;
-            SetWindowPosition(static_cast<int>(windowPos.x), static_cast<int>(windowPos.y));
-        }
-
-        // Делегируем обработку ввода текущему состоянию
-        currentState->HandleInput();
-        if (_states.empty() || currentState != _states.top().get())
-        {
-            continue;  // Начать следующую итерацию цикла немедленно
-        }
-
-        // Делегируем обновление логики текущему состоянию
-        currentState->Update(GetFrameTime());
+        // 2. Обновляем логику текущего состояния
+        _stateManager->Update(GetFrameTime());
 
         // --- Отрисовка ---
         BeginDrawing();
@@ -136,8 +104,8 @@ void Application::Run()
             ClearBackground(BLANK);
             DrawRectangle(0, 0, _screenWidth, _screenHeight, Fade(DARKGRAY, 0.7f));
 
-            // Делегируем отрисовку текущему состоянию
-            currentState->Draw();
+            // 3. Рисуем текущее состояние
+            _stateManager->Draw();
         }
         EndDrawing();
     }

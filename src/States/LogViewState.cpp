@@ -6,8 +6,9 @@
 
 #include "Core/Application.hpp"
 #include "Core/Config/Config.hpp"
+#include "Core/StateManager.hpp"
 
-LogViewState::LogViewState(Application& app) : _app(app)
+LogViewState::LogViewState(Application& app, StateManager& stateManager) : _app(app), _stateManager(stateManager)
 {
     // Создаем кнопку "Добавить" в правом верхнем углу
     Rectangle buttonBounds = {AsConfig::WindowWidth - 150.0f, 20.0f, 130.0f, 40.0f};
@@ -46,7 +47,7 @@ void LogViewState::HandleInput()
 {
     if (IsKeyPressed(KEY_BACKSPACE))
     {
-        _app.PopState();
+        _stateManager.PopState();
     }
 }
 

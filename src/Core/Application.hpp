@@ -4,11 +4,13 @@
 
 #include <raylib.h>
 
-#include <memory>  // Для std::unique_ptr
-#include <stack>   // Для std::stack
+#include <memory>
 #include <string>
 
-#include "States/State.hpp"  // Подключаем наш базовый класс состояния
+#include "Core/StateManager.hpp"  // <--- Меняем State.hpp на StateManager.hpp
+
+// Больше не нужен stack
+// class State; // Больше не нужно
 
 class Application
 {
@@ -18,15 +20,14 @@ public:
 
     void Run();
 
-    // --- Новые публичные методы для управления состояниями ---
-    void PushState(std::unique_ptr<State> state);
-    void PopState();
-
-    // Сделаем шрифт публичным, чтобы состояния могли его использовать
     Font& GetFont()
     {
         return _cyrillicFont;
     }
+    StateManager& GetStateManager()
+    {
+        return *_stateManager;
+    }  // <--- Геттер для менеджера
 
 private:
     void LoadAssets();
@@ -36,10 +37,6 @@ private:
     int _screenHeight;
     Font _cyrillicFont;
 
-    // --- Новые приватные поля для машины состояний ---
-
-    // Стек состояний. std::stack - это как стопка тарелок.
-    // Мы можем положить новую тарелку сверху (push) или снять верхнюю (pop).
-    // Верхняя тарелка - это всегда активное состояние.
-    std::stack<std::unique_ptr<State>> _states;
+    // Заменяем стек на один указатель на StateManager
+    std::unique_ptr<StateManager> _stateManager;
 };

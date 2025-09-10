@@ -19,11 +19,13 @@ enum class HubIcon
 };
 
 class Application;
+class StateManager;
 
 class HubState final : public State
 {
 public:
-    HubState(Application& app);
+    // Конструктор теперь принимает Application (для ресурсов) и StateManager (для навигации)
+    HubState(Application &app, StateManager &stateManager);
     ~HubState() override;
 
     void HandleInput() override;
@@ -31,7 +33,8 @@ public:
     void Draw() override;
 
 private:
-    Application& _app;
+    Application &_app;
+    StateManager &_stateManager;
 
     // Храним нашу иконку в умном указателе.
     // Это гарантирует, что она будет правильно создана и уничтожена вместе с HubState.

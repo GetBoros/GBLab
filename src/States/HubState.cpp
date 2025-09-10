@@ -5,9 +5,10 @@
 #include <format>  // Для std::format
 
 #include "Core/Application.hpp"
+#include "Core/StateManager.hpp"
 #include "States/LogViewState.hpp"
 
-HubState::HubState(Application& app) : _app(app)
+HubState::HubState(Application& app, StateManager& stateManager) : _app(app), _stateManager(stateManager)
 {
     // 1. Иконка Кликера
     const std::string clickerIconPath = std::format("{}/icons/icon_clicker.png", ASSETS_PATH);
@@ -37,7 +38,7 @@ void HubState::HandleInput()
 
     if (IsKeyPressed(KEY_Q))
     {
-        _app.PopState();
+        _stateManager.PopState();
     }
 
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
@@ -48,20 +49,20 @@ void HubState::HandleInput()
 
         if (_icons[clickerIndex]->IsClicked(GetMousePosition()))
         {
-            _app.PushState(std::make_unique<ClickerState>(_app));
+            _stateManager.PushState(std::make_unique<ClickerState>(_app, _stateManager));
         }
 
         // --- НОВАЯ ЛОГИКА ---
         if (_icons[loggerIndex]->IsClicked(GetMousePosition()))
         {
             TraceLog(LOG_INFO, "Logger icon clicked! Pushing LogViewState.");
-            _app.PushState(std::make_unique<LogViewState>(_app));
+            _stateManager.PushState(std::make_unique<LogViewState>(_app, _stateManager));
         }
         // ---------------------
 
         if (_icons[exitIndex]->IsClicked(GetMousePosition()))
         {
-            _app.PopState();
+            _stateManager.PopState();
         }
     }
 }

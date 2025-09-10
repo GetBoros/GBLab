@@ -12,11 +12,12 @@
 #include "States/State.hpp"
 
 class Application;
+class StateManager;
 
 class LogViewState final : public State
 {
 public:
-    LogViewState(Application& app);
+    LogViewState(Application &app, StateManager &stateManager);
     ~LogViewState() override;
 
     void HandleInput() override;
@@ -26,7 +27,8 @@ public:
 private:
     void AddMessage();
 
-    Application& _app;
+    Application &_app;
+    StateManager &_stateManager;
 
     // Кнопка для добавления сообщений
     std::unique_ptr<Button> _addButton;

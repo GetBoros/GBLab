@@ -7,8 +7,10 @@
 
 #include "Core/Application.hpp"
 #include "Core/Config/Config.hpp"
+#include "Core/StateManager.hpp"
 
-ClickerState::ClickerState(Application& app) : _app(app), _clickCount(0)
+ClickerState::ClickerState(Application &app, StateManager &stateManager)
+    : _app(app), _stateManager(stateManager), _clickCount(0)
 {
     // Определяем геометрию кнопки
     const float buttonWidth = 200.0f;
@@ -32,7 +34,7 @@ void ClickerState::HandleInput()
 {
     if (IsKeyPressed(KEY_BACKSPACE))
     {
-        _app.PopState();
+        _stateManager.PopState();
     }
 }
 

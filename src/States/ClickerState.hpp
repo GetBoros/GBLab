@@ -10,11 +10,12 @@
 #include "States/State.hpp"
 
 class Application;
+class StateManager;
 
 class ClickerState final : public State
 {
 public:
-    ClickerState(Application& app);
+    ClickerState(Application &app, StateManager &stateManager);
     ~ClickerState() override;
 
     void HandleInput() override;
@@ -22,8 +23,10 @@ public:
     void Draw() override;
 
 private:
-    Application& _app;
     long long _clickCount;
+
+    Application &_app;
+    StateManager &_stateManager;
 
     // Заменяем Rectangle и Color на один умный указатель на нашу кнопку!
     std::unique_ptr<Button> _clickerButton;
