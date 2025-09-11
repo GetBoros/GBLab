@@ -20,19 +20,38 @@ ClickerState::ClickerState(Application &app, StateManager &stateManager)
                               buttonWidth, buttonHeight};
 
     std::ifstream saveFile(AsConfig::GetClickerSavePath());
+
     // Проверяем, открылся ли файл и не пуст ли он
-    if (saveFile.is_open())
+    if (!saveFile.is_open())
     {
-        // Читаем из файла в нашу переменную, как будто это cin
-        saveFile >> _clickCount;
-        TraceLog(LOG_INFO, "Clicker save loaded. Score: %lld", _clickCount);
+        // Файла нет (первый запуск), ничего не делаем, _score останется 0
+        return;
     }
-    else
+
+    // 2. Создаем JSON-объект, в который будем парсить данные
+    nlohmann::json loadData;
+
+    try
     {
-        // Файла нет или не удалось открыть - это нормально при первом запуске.
-        // Просто начинаем с нуля.
-        TraceLog(LOG_INFO, "No clicker save file found. Starting new game.");
+        // 3. Парсим данные прямо из потока файла
+        saveFile >> loadData;
+
+        // 4. Проверяем, есть ли в JSON нужный нам ключ "score"
+        if (loadData.contains("score"))
+        {
+            // 5. Если есть, присваиваем значение переменной _score
+            // Библиотека сама позаботится о преобразовании типов
+            _clickCount = loadData["score"];
+        }
     }
+    catch (nlohmann::json::parse_error &e)
+    {
+        // Если файл поврежден или содержит невалидный JSON,
+        // мы просто проигнорируем его, чтобы приложение не упало.
+        // В реальном проекте здесь можно было бы логировать ошибку.
+        // Например: std::cerr << "JSON parse error: " << e.what() << '\n';
+    }
+
     // Создаем наш объект Button одной строкой!
     _clickerButton = std::make_unique<Button>(buttonBounds, "Кликай!", AsConfig::DefaultFontSize, _app.GetFont());
 
@@ -46,11 +65,16 @@ ClickerState::~ClickerState()
     // Если есть, его содержимое будет перезаписано.
     std::ofstream saveFile(AsConfig::GetClickerSavePath());
 
+    nlohmann::json saveData;
+
+    // 2. Наполняем его данными, как будто это std::map
+    saveData["score"] = _clickCount;
+
     // Проверяем, удалось ли открыть файл для записи
     if (saveFile.is_open())
     {
         // Записываем в файл наш счетчик, как будто это cout
-        saveFile << _clickCount;
+        saveFile << saveData.dump(4);
         TraceLog(LOG_INFO, "Clicker score saved: %lld", _clickCount);
     }
     else
