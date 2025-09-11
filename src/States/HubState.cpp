@@ -44,7 +44,7 @@ void HubState::HandleInput()
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
     {
         int clickerIndex = static_cast<int>(HubIcon::Clicker);
-        int loggerIndex = static_cast<int>(HubIcon::Logger);  // <--- Добавляем
+        int loggerIndex = static_cast<int>(HubIcon::Logger);
         int exitIndex = static_cast<int>(HubIcon::Exit);
 
         if (_icons[clickerIndex]->IsClicked(GetMousePosition()))

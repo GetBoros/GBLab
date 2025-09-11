@@ -8,6 +8,7 @@
 #include <fstream>
 #include <string>
 
+#include "ClickerState.hpp"
 #include "Core/Application.hpp"
 #include "Core/Config/Config.hpp"
 #include "Core/StateManager.hpp"
@@ -15,53 +16,35 @@
 ClickerState::ClickerState(Application &app, StateManager &stateManager)
     : _app(app), _stateManager(stateManager), _clickCount(0), _sessionCount(0)
 {
-    // Определяем геометрию кнопки
+    // 1. Создаем кнопку (она ни от чего не зависит)
     const float buttonWidth = 200.0f;
     const float buttonHeight = 100.0f;
     Rectangle buttonBounds = {(AsConfig::WindowWidth - buttonWidth) / 2, (AsConfig::WindowHeight - buttonHeight) / 2,
                               buttonWidth, buttonHeight};
-
-    std::ifstream saveFile(AsConfig::GetClickerSavePath());
-
-    // Создаем наш объект Button одной строкой!
     _clickerButton = std::make_unique<Button>(buttonBounds, "Кликай!", AsConfig::DefaultFontSize, _app.GetFont());
 
-    TraceLog(LOG_INFO, "ClickerState Constructed");
-
-    // Проверяем, открылся ли файл и не пуст ли он
-    if (!saveFile.is_open())
+    // 2. Загружаем данные из файла, обновляя _clickCount
+    std::ifstream saveFile(AsConfig::GetClickerSavePath());
+    if (saveFile.is_open())
     {
-        // Файла нет (первый запуск), ничего не делаем, _score останется 0
-        return;
-    }
-
-    // 2. Создаем JSON-объект, в который будем парсить данные
-    nlohmann::json loadData;
-    try
-    {
-        saveFile >> loadData;
-
-        // Загружаем 'score'. Метод .value() великолепен:
-        // если ключ "score" есть, он вернет его значение.
-        // Если ключа нет, он вернет значение по умолчанию (второй аргумент), не вызывая ошибки!
-        _clickCount = loadData.value("score", 0LL);  // 0LL - long long
-
-        // Точно так же загружаем 'sessionCount'
-        _sessionCount = loadData.value("sessionCount", 0);
-        TraceLog(LOG_INFO, "Last session count was : %lld", _sessionCount);
-
-        // Дату последнего сохранения можно просто вывести в лог для проверки
-        if (loadData.contains("lastSaveTime"))
+        try
         {
-            std::string lastSave = loadData.value("lastSaveTime", "never");
-            TraceLog(LOG_INFO, "Last save time was: %s", lastSave.c_str());
+            nlohmann::json loadData;
+            saveFile >> loadData;
+            _clickCount = loadData.value("score", 0LL);
+            _sessionCount = loadData.value("sessionCount", 0);
+            // ... остальная логика загрузки ...
+        }
+        catch (const nlohmann::json::parse_error &e)
+        {
+            TraceLog(LOG_WARNING, "JSON parse error: %s", e.what());
         }
     }
-    catch (const nlohmann::json::parse_error &e)
-    {
-        // Обработка ошибки, если файл поврежден
-        TraceLog(LOG_WARNING, "JSON parse error in clicker save: %s", e.what());
-    }
+
+    // 3. И ТОЛЬКО ТЕПЕРЬ создаем/обновляем лейбл, когда все данные готовы
+    _updateScoreLabel();
+
+    TraceLog(LOG_INFO, "ClickerState Constructed");
 }
 
 ClickerState::~ClickerState()
@@ -103,7 +86,6 @@ ClickerState::~ClickerState()
     TraceLog(LOG_INFO, "ClickerState Destructed");
 }
 
-// HandleInput теперь не нужен, т.к. кнопка сама обрабатывает ввод в своем Update
 void ClickerState::HandleInput()
 {
     if (IsKeyPressed(KEY_BACKSPACE))
@@ -112,7 +94,6 @@ void ClickerState::HandleInput()
     }
 }
 
-// Update стал невероятно простым!
 void ClickerState::Update(float deltaTime)
 {
     // Просто обновляем кнопку
@@ -122,22 +103,41 @@ void ClickerState::Update(float deltaTime)
     if (_clickerButton->IsClicked())
     {
         _clickCount++;
+        _updateScoreLabel();
     }
 }
 
-// Draw тоже стал намного чище
 void ClickerState::Draw()
 {
     DrawRectangle(0, 0, AsConfig::WindowWidth, AsConfig::WindowHeight, Fade(BLACK, 0.3f));
 
-    // Просто просим кнопку нарисовать себя
+    _scoreLabel->Draw();
     _clickerButton->Draw();
 
-    // Логика отрисовки счета и подсказок остается здесь
-    std::string scoreText = std::format("Сделано кликов: {}", _clickCount);
-    const Vector2 scoreTextSize = MeasureTextEx(_app.GetFont(), scoreText.c_str(), 30, 2);
-    const Vector2 scorePos = {(800 - scoreTextSize.x) / 2, 150};  // y-координату лучше задать явно
-    DrawTextEx(_app.GetFont(), scoreText.c_str(), scorePos, 30, 2, RAYWHITE);
-
     DrawTextEx(_app.GetFont(), "Нажми Backspace для возврата в меню", {210, 400}, 20, 1, LIGHTGRAY);
+}
+
+void ClickerState::_updateScoreLabel()
+{
+    // 1. Формируем новый текст
+    std::string newScoreText = std::format("Сделано кликов: {}", _clickCount);
+
+    // 2. Если лейбл еще не создан (первый вызов из конструктора), создаем его
+    if (!_scoreLabel)
+    {
+        const float fontSize = 30.0f;
+        const float fontSpacing = 2.0f;
+        const Vector2 scoreTextSize = MeasureTextEx(_app.GetFont(), newScoreText.c_str(), fontSize, fontSpacing);
+        const Vector2 scorePos = {(AsConfig::WindowWidth - scoreTextSize.x) / 2.0f, 150.0f};
+        _scoreLabel = std::make_unique<Label>(newScoreText, scorePos, _app.GetFont(), fontSize, RAYWHITE, fontSpacing);
+    }
+    // 3. Если лейбл уже существует, просто обновляем его
+    else
+    {
+        _scoreLabel->SetText(newScoreText);
+        // Пересчитываем позицию для центрирования
+        const Vector2 scoreTextSize = MeasureTextEx(_app.GetFont(), newScoreText.c_str(), 30.0f, 2.0f);
+        const Vector2 newScorePos = {(AsConfig::WindowWidth - scoreTextSize.x) / 2.0f, 150.0f};
+        _scoreLabel->SetPosition(newScorePos);
+    }
 }

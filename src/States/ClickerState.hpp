@@ -8,6 +8,7 @@
 #include <nlohmann/json.hpp>
 
 #include "Components/Button.hpp"  // Подключаем наш новый компонент
+#include "Components/Label.hpp"
 #include "States/State.hpp"
 
 class Application;
@@ -45,6 +46,9 @@ public:
     void Draw() override;
 
 private:
+    /// @brief Обновляет текст и позицию метки со счетом для ее центрирования.
+    void _updateScoreLabel();
+
     /// @brief Счетчик запусков (сессий) этого состояния.
     int _sessionCount;
 
@@ -60,4 +64,7 @@ private:
     /// @brief Умный указатель на кнопку "Кликер".
     /// Используется std::unique_ptr для автоматического управления памятью.
     std::unique_ptr<Button> _clickerButton;
+
+    /// @brief Умный указатель на метку для отображения счета.
+    std::unique_ptr<Label> _scoreLabel;
 };
