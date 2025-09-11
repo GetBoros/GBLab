@@ -2,6 +2,8 @@
 
 #include "States/ClickerState.hpp"
 
+#include <chrono>
+#include <ctime>
 #include <format>
 #include <fstream>
 #include <string>
@@ -11,7 +13,7 @@
 #include "Core/StateManager.hpp"
 
 ClickerState::ClickerState(Application &app, StateManager &stateManager)
-    : _app(app), _stateManager(stateManager), _clickCount(0)
+    : _app(app), _stateManager(stateManager), _clickCount(0), _sessionCount(0)
 {
     // Определяем геометрию кнопки
     const float buttonWidth = 200.0f;
@@ -20,6 +22,11 @@ ClickerState::ClickerState(Application &app, StateManager &stateManager)
                               buttonWidth, buttonHeight};
 
     std::ifstream saveFile(AsConfig::GetClickerSavePath());
+
+    // Создаем наш объект Button одной строкой!
+    _clickerButton = std::make_unique<Button>(buttonBounds, "Кликай!", AsConfig::DefaultFontSize, _app.GetFont());
+
+    TraceLog(LOG_INFO, "ClickerState Constructed");
 
     // Проверяем, открылся ли файл и не пуст ли он
     if (!saveFile.is_open())
@@ -30,32 +37,31 @@ ClickerState::ClickerState(Application &app, StateManager &stateManager)
 
     // 2. Создаем JSON-объект, в который будем парсить данные
     nlohmann::json loadData;
-
     try
     {
-        // 3. Парсим данные прямо из потока файла
         saveFile >> loadData;
 
-        // 4. Проверяем, есть ли в JSON нужный нам ключ "score"
-        if (loadData.contains("score"))
+        // Загружаем 'score'. Метод .value() великолепен:
+        // если ключ "score" есть, он вернет его значение.
+        // Если ключа нет, он вернет значение по умолчанию (второй аргумент), не вызывая ошибки!
+        _clickCount = loadData.value("score", 0LL);  // 0LL - long long
+
+        // Точно так же загружаем 'sessionCount'
+        _sessionCount = loadData.value("sessionCount", 0);
+        TraceLog(LOG_INFO, "Last session count was : %lld", _sessionCount);
+
+        // Дату последнего сохранения можно просто вывести в лог для проверки
+        if (loadData.contains("lastSaveTime"))
         {
-            // 5. Если есть, присваиваем значение переменной _score
-            // Библиотека сама позаботится о преобразовании типов
-            _clickCount = loadData["score"];
+            std::string lastSave = loadData.value("lastSaveTime", "never");
+            TraceLog(LOG_INFO, "Last save time was: %s", lastSave.c_str());
         }
     }
-    catch (nlohmann::json::parse_error &e)
+    catch (const nlohmann::json::parse_error &e)
     {
-        // Если файл поврежден или содержит невалидный JSON,
-        // мы просто проигнорируем его, чтобы приложение не упало.
-        // В реальном проекте здесь можно было бы логировать ошибку.
-        // Например: std::cerr << "JSON parse error: " << e.what() << '\n';
+        // Обработка ошибки, если файл поврежден
+        TraceLog(LOG_WARNING, "JSON parse error in clicker save: %s", e.what());
     }
-
-    // Создаем наш объект Button одной строкой!
-    _clickerButton = std::make_unique<Button>(buttonBounds, "Кликай!", AsConfig::DefaultFontSize, _app.GetFont());
-
-    TraceLog(LOG_INFO, "ClickerState Constructed");
 }
 
 ClickerState::~ClickerState()
@@ -67,22 +73,32 @@ ClickerState::~ClickerState()
 
     nlohmann::json saveData;
 
-    // 2. Наполняем его данными, как будто это std::map
-    saveData["score"] = _clickCount;
+    // 1. Увеличиваем счетчик сессий ПЕРЕД сохранением
+    _sessionCount++;
 
-    // Проверяем, удалось ли открыть файл для записи
+    // 2. Получаем текущее время
+    const auto now = std::chrono::system_clock::now();
+    const auto time_t_now = std::chrono::system_clock::to_time_t(now);
+    // std::put_time требует буфер, безопаснее использовать std::string
+    char time_buf[26];
+    ctime_r(&time_t_now, time_buf);  // Используем потокобезопасную ctime_r
+    std::string time_str(time_buf);
+    time_str.pop_back();  // Убираем лишний символ новой строки, который добавляет ctime_r
+
+    // 3. Наполняем JSON-объект новыми данными
+    saveData["score"] = _clickCount;
+    saveData["sessionCount"] = _sessionCount;
+    saveData["lastSaveTime"] = time_str;
+
     if (saveFile.is_open())
     {
-        // Записываем в файл наш счетчик, как будто это cout
         saveFile << saveData.dump(4);
         TraceLog(LOG_INFO, "Clicker score saved: %lld", _clickCount);
     }
     else
     {
-        // Если не удалось - выводим ошибку. Это уже нештатная ситуация.
         TraceLog(LOG_ERROR, "Failed to open save file for writing!");
     }
-    // saveFile закроется автоматически при выходе из деструктора
 
     TraceLog(LOG_INFO, "ClickerState Destructed");
 }

@@ -45,6 +45,9 @@ public:
     void Draw() override;
 
 private:
+    /// @brief Счетчик запусков (сессий) этого состояния.
+    int _sessionCount;
+
     /// @brief Текущее значение счетчика кликов.
     long long _clickCount;
 
