@@ -34,6 +34,14 @@ FetchContent_Declare(
   GIT_SHALLOW    TRUE    # Скачиваем только последнюю версию, без всей истории коммитов
 )
 FetchContent_MakeAvailable(googletest)
+
+# --- nlohmann/json (for data serialization) ---
+FetchContent_Declare(
+  json
+  GIT_REPOSITORY https://github.com/nlohmann/json.git
+  GIT_TAG        v3.11.3 # A recent, stable version
+)
+FetchContent_MakeAvailable(json)
 #-------------------------------------------------------------------------------------------------------------
 add_executable(HelloWorld ${PROJECT_SOURCES} )
 
@@ -42,7 +50,7 @@ target_include_directories(HelloWorld PUBLIC ${CMAKE_SOURCE_DIR}/src)  # where f
 # add dependecies, macros ASSETS_PATH has absolute path to assets folder
 target_compile_definitions(HelloWorld PUBLIC "ASSETS_PATH=\"${CMAKE_SOURCE_DIR}/assets\"")
 
-target_link_libraries(HelloWorld PRIVATE raylib)
+target_link_libraries(HelloWorld PRIVATE raylib nlohmann_json::nlohmann_json)
 #-------------------------------------------------------------------------------------------------------------
 enable_testing()  # add new feature
 add_executable(runTests
