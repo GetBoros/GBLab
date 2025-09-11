@@ -18,13 +18,13 @@ Icon::~Icon()
     UnloadTexture(_texture);
 }
 
-void Icon::Draw()
+void Icon::Draw() const
 {
     // Рисуем текстуру в заданной позиции без дополнительного окрашивания (WHITE)
     DrawTextureV(_texture, _position, WHITE);
 }
 
-bool Icon::IsClicked(Vector2 mousePosition)
+bool Icon::IsClicked(Vector2 mousePosition) const
 {
     // Raylib предоставляет удобную функцию для проверки столкновения точки и прямоугольника
     return CheckCollisionPointRec(mousePosition, _bounds);

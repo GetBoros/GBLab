@@ -6,6 +6,7 @@
 
 #include "Core/Application.hpp"
 #include "Core/StateManager.hpp"
+#include "States/ClickerState.hpp"
 #include "States/LogViewState.hpp"
 
 HubState::HubState(Application& app, StateManager& stateManager) : _app(app), _stateManager(stateManager)
