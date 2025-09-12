@@ -24,6 +24,9 @@ public:
     Icon(const Icon&) = delete;
     Icon& operator=(const Icon&) = delete;
 
+    /// @brief Обновляет состояние и анимацию иконки. Должен вызываться каждый кадр.
+    void Update();
+
     /// @brief Отрисовывает иконку.
     /// Не изменяет состояние объекта, поэтому помечен как const.
     void Draw() const;  // Улучшение: Добавлен const
@@ -31,10 +34,18 @@ public:
     /// @brief Проверяет, находится ли точка (курсор) в границах иконки.
     /// @param point Координаты точки для проверки.
     /// @return true, если точка внутри, иначе false.
-    bool IsClicked(Vector2 point) const;  // Улучшение: Добавлен const
+    bool IsClicked() const;  // Улучшение: Добавлен const
 
 private:
     Texture2D _texture;  ///< Ресурс текстуры, управляемый этим объектом.
     Vector2 _position;   ///< Позиция на экране.
     Rectangle _bounds;   ///< Границы для проверки столкновений.
+
+    // --- НОВЫЕ ПОЛЯ ДЛЯ АНИМАЦИИ ---
+    Color _baseTint;        ///< Базовый оттенок (обычно белый - без изменений).
+    Color _hoverTint;       ///< Оттенок при наведении (например, серый).
+    Color _currentTint;     ///< Текущий оттенок, который плавно меняется.
+    float _animationSpeed;  ///< Скорость перехода цвета.
+    bool _isHovered;        ///< Наведен ли курсор на иконку?
+    bool _isClicked;        ///< Была ли иконка нажата в этом кадре?
 };

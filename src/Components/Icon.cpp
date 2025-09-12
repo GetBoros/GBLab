@@ -2,20 +2,40 @@
 
 #include "Components/Icon.hpp"
 
+#include "Core/Tools/Tools.hpp"
+
 Icon::Icon(const std::string& texturePath, Vector2 position)
-    : _texture(LoadTexture(texturePath.c_str())), _position(position)
+    : _position(position),
+      // --- Инициализируем новые поля ---
+      _baseTint({120, 120, 120, 255}),  // Темно-серый оттенок (иконка будет "в тени")
+      _hoverTint(WHITE),
+      _currentTint(_baseTint),
+      _animationSpeed(6.0f),
+      _isHovered(false),
+      _isClicked(false)
 {
-    // Инициализируем границы иконки на основе ее размера и позиции
-    _bounds.x = _position.x;
-    _bounds.y = _position.y;
-    _bounds.width = static_cast<float>(_texture.width);
-    _bounds.height = static_cast<float>(_texture.height);
+    _texture = LoadTexture(texturePath.c_str());
+    _bounds = {_position.x, _position.y, (float)_texture.width, (float)_texture.height};
 }
 
 Icon::~Icon()
 {
-    // Очень важно освобождать текстуру, когда иконка больше не нужна
     UnloadTexture(_texture);
+}
+
+// --- НОВЫЙ МЕТОД UPDATE ---
+void Icon::Update()
+{
+    _isClicked = false;
+    _isHovered = CheckCollisionPointRec(GetMousePosition(), _bounds);
+
+    if (_isHovered && IsMouseButtonReleased(MOUSE_LEFT_BUTTON))
+    {
+        _isClicked = true;
+    }
+
+    Color targetTint = _isHovered ? _hoverTint : _baseTint;
+    _currentTint = AsTools::ColorLerp(_currentTint, targetTint, _animationSpeed * GetFrameTime());
 }
 
 void Icon::Draw() const
@@ -24,8 +44,9 @@ void Icon::Draw() const
     DrawTextureV(_texture, _position, WHITE);
 }
 
-bool Icon::IsClicked(Vector2 mousePosition) const
+// --- ОБНОВЛЕННЫЙ МЕТОД ISCLICKED ---
+bool Icon::IsClicked() const
 {
-    // Raylib предоставляет удобную функцию для проверки столкновения точки и прямоугольника
-    return CheckCollisionPointRec(mousePosition, _bounds);
+    // Теперь мы просто возвращаем флаг, который выставляется в Update()
+    return _isClicked;
 }
