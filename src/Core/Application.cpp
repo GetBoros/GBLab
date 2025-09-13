@@ -1,6 +1,11 @@
 #include "Core/Application.hpp"
 
-#include <unistd.h>  // Для функции getcwd
+// --- НАЧАЛО ИСПРАВЛЕНИЯ: Кросс-платформенные инклюды ---
+#if defined(__linux__) || defined(__APPLE__)
+#include <unistd.h>  // Для getcwd в Linux/macOS
+#elif defined(_WIN32)
+#include <direct.h>  // Для _getcwd в Windows
+#endif
 
 #include <format>
 #include <vector>
@@ -20,17 +25,18 @@ Application::Application(int width, int height, const std::string &title)
 
     // Создаем StateManager
     _stateManager = std::make_unique<StateManager>(*this);
-    // И сразу добавляем в него начальное состояние
     _stateManager->PushState(std::make_unique<HubState>(*this, *_stateManager));
-
-    // --- ВОТ РЕШЕНИЕ ---
-    // Принудительно обрабатываем отложенные изменения СРАЗУ ПОСЛЕ
-    // добавления первого состояния. Это "переложит" HubState из временного
-    // хранилища в основной стек до начала главного цикла.
     _stateManager->ProcessStateChanges();
-
     char currentPath[1024];
-    if (getcwd(currentPath, sizeof(currentPath)) != nullptr)
+    char *result = nullptr;  // Используем общую переменную для результата
+
+#if defined(__linux__) || defined(__APPLE__)
+    result = getcwd(currentPath, sizeof(currentPath));
+#elif defined(_WIN32)
+    result = _getcwd(currentPath, sizeof(currentPath));
+#endif
+
+    if (result != nullptr)
     {
         TraceLog(LOG_WARNING, "Current Working Directory is: %s", currentPath);
     }

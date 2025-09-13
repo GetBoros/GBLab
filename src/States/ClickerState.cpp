@@ -64,7 +64,15 @@ ClickerState::~ClickerState()
     const auto time_t_now = std::chrono::system_clock::to_time_t(now);
     // std::put_time требует буфер, безопаснее использовать std::string
     char time_buf[26];
-    ctime_r(&time_t_now, time_buf);  // Используем потокобезопасную ctime_r
+// --- КРОСС-ПЛАТФОРМЕННОЕ РЕШЕНИЕ ---
+#if defined(__linux__) || defined(__APPLE__)
+    // На Linux/macOS используем потокобезопасную ctime_r
+    ctime_r(&time_t_now, time_buf);
+#elif defined(_WIN32)
+    // На Windows используем "безопасную" ctime_s
+    ctime_s(time_buf, sizeof(time_buf), &time_t_now);
+#endif
+    // ------------------------------------
     std::string time_str(time_buf);
     time_str.pop_back();  // Убираем лишний символ новой строки, который добавляет ctime_r
 
