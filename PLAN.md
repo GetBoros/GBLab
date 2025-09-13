@@ -1,86 +1,51 @@
-# План обучения C++ в среде Linux
+# C++ Learning Plan for Linux Environment
 
----
+### Our Official Progress Plan
 
-### Наш официальный план прогресса
+## I. Environment & Workflow Fundamentals
 
-## I. Основы работы в среде
+- [x] **Environment Setup**: Installed `g++`, `gdb`, `cmake`, and `git`.
+- [x] **VS Code Configuration**: Set up C/C++, CMake Tools extensions, `launch.json`, and `tasks.json`.
+- [x] **Build & Run Process**: Mastered the build (`F7`), run (`Ctrl+F5`), and debug (`F5`) cycle.
+- [x] **Debugging**: Used breakpoints, variable inspection, and the call stack.
+- [x] **Multi-file Projects**: Structured the project with `src/`, `tests/`, and configured `CMakeLists.txt` accordingly.
+- [x] **Code Formatting**: Set up `.clang-format` for consistent style and enabled `formatOnSave` in VS Code.
 
-- [v] **Настройка окружения**: Установка `g++`, `gdb`, `cmake` и `git`.
-- [v] **Настройка VS Code**: Установка расширений C/C++, CMake Tools, настройка `launch.json` и `c_cpp_properties.json`.
-- [v] **Сборка и запуск**: Первая компиляция, работа с CMake, кнопки `Build` (`F7`) и `Launch` (`Ctrl+F5`).
-- [v] **Отладка**: `F5`, точки останова, просмотр переменных, стек вызовов.
-- [v] **Многофайловые проекты**: Разделение на `.hpp`/`.cpp`, правильная структура проекта (`src/`, `tests/`), обновление `CMakeLists.txt`.
+## II. C++ Ecosystem & Tooling
 
-## II. Углубление в C++ и экосистему
+- [x] **Dependency Management**:
+  - [x] **Using `FetchContent`**: Automatically downloading and building `raylib`, `googletest`, and `nlohmann/json`.
+  - [ ] **Linking System Libraries**: (To be covered when needed).
+- [x] **Data Serialization**:
+  - [x] **JSON Integration**: Added `nlohmann/json` to handle saving/loading structured data (`.sav` files).
+- [x] **Unit Testing**:
+  - [x] Introduced GoogleTest framework.
+  - [x] Wrote first unit tests.
+  - [x] Integrated tests into CMake for execution.
+- [x] **Version Control (Git)**:
+  - [x] **Core Commands**: `git init`, `add`, `commit`, `push`.
+  - [x] **Remote Repositories**: `git remote`, PAT authentication.
+  - [x] **History Management**: `git log`, `restore`, `revert`.
+  - [x] **Committing Standards**: Adopted the "Conventional Commits" standard (`feat:`, `refactor:`, etc.).
 
-- [v] **Управление зависимостями**:
-  - [ ] Подключение системных библиотек (мы это пока не делали явно, но это будет просто).
-  - [v] **Использование `FetchContent`**: Автоматическое скачивание и сборка Raylib и GoogleTest.
-- [v] **Тестирование**:
-  - [v] Знакомство с GoogleTest.
-  - [v] Написание первого Unit-теста.
-  - [v] Интеграция тестов в CMake и запуск через VS Code.
-- [v] **Инструменты командной строки (Git)**:
-  - [v] **Основы Git**: `git init`, `git add`, `git commit`.
-  - [v] **Работа с удаленным репозиторием**: `git remote`, `git push`, аутентификация через HTTPS (Personal Access Token) и основы SSH.
-  - [v] **"Машина времени" Git**: Просмотр истории (`git log`), отмена локальных изменений (`git restore`), отмена подготовленных изменений (`git restore --staged`), безопасная отмена коммитов (`git revert`).
-  - [v] **(БОНУС) Разрешение конфликтов**: Встретили и успешно разрешили свой первый `merge conflict` во время `revert`.
+## III. Application Architecture & UI Development
 
-## III. Качество кода и автоматизация (Новый раздел!)
+- [x] **Core Architecture**:
+  - [x] **State Machine Pattern**: Implemented a `StateManager` to handle different application screens (`HubState`, `ClickerState`, etc.).
+- [x] **Component-Based UI**:
+  - [x] **Reusable Components**: Created a component system for UI elements (`Icon`, `Button`, `Label`) to enforce DRY principles.
+- [x] **Code Reusability**:
+  - [x] **Utility Class**: Refactored common functions (like `ColorLerp`) into a static `AsTools` class for project-wide use.
+- [x] **UI Polish & Animation**:
+  - [x] **Animated Buttons**: Implemented smooth color transitions on hover using linear interpolation.
+  - [x] **Animated Icons**: Applied the same animation principles to icons using texture tinting for a consistent and responsive feel.
 
-- [v] **(БОНУС) Автоматическое форматирование кода**:
-  - [v] Создание и настройка файла `.clang-format` для единого стиля кода.
-  - [v] Интеграция `clang-format` с VS Code для форматирования при сохранении (`formatOnSave`).
-- [v] **(БОНУС) Настройка редактора**: Тонкая настройка поведения отступов (`Editor: Auto Indent`) для комфортной работы.
+## IV. Advanced Topics & Future Goals
 
-## IV. Продвинутые темы
-
-- [ ] **Инструменты анализа и отладки**:
-  - [ ] Поиск утечек памяти с помощью `Valgrind`.
-  - [ ] Статический анализ кода с помощью `clang-tidy`.
-- [ ] ... (будем добавлять по мере продвижения)
-
----
-
-
-/*
-Что же дальше? Наш план развития
-
-Теперь, когда у нас есть надежный фундамент и отлаженный рабочий процесс, мы можем начать строить настоящий дом. Наш "Hello World" — это всего лишь фундамент. Давай посмотрим, куда мы можем двигаться дальше.
-
-Вот логичные следующие шаги, которые превращают новичка в Linux-разработке в уверенного профессионала:
-
-1. Архитектура проекта: Работа с несколькими файлами.
-Настоящие проекты состоят не из одного main.cpp, а из десятков или сотен файлов. Наш следующий шаг — научиться правильно структурировать проект:
-
-    Разделять код на заголовочные файлы (.h или .hpp) и файлы реализации (.cpp).
-
-    Понять, что такое "единица трансляции".
-
-    Научить наш CMakeLists.txt находить и компилировать все файлы проекта, а не только один.
-
-2. Управление зависимостями: Подключение библиотек.
-Ты не будешь писать всё с нуля. Разработка — это использование готовых, проверенных решений (библиотек). Мы научимся двум основным способам:
-
-    Использование системных библиотек: Как найти и подключить к проекту библиотеку, установленную через apt (например, для работы с графикой, звуком или сетью).
-
-    Современный подход с FetchContent: Как заставить CMake самостоятельно скачивать и собирать нужные нам библиотеки прямо во время сборки нашего проекта. Это невероятно мощный и гибкий способ, который является стандартом в современной кроссплатформенной разработке.
-
-3. Обеспечение качества: Основы Unit-тестирования.
-Как убедиться, что твой код работает правильно не только сейчас, но и не сломается в будущем после изменений? Для этого пишут тесты. Мы:
-
-    Познакомимся с фреймворком GoogleTest, который является индустриальным стандартом.
-
-    Научимся добавлять в наш CMake-проект отдельную цель для сборки и запуска тестов.
-
-4. Инструменты командной строки "для Профи":
-Теперь, когда ты не боишься терминала, пора познакомиться с его суперсилами, аналогов которым в мире Visual Studio часто нет (или они платные).
-
-    Git: Система контроля версий. Это абсолютный must have. Мы научимся создавать репозиторий, коммитить изменения и работать с историей проекта.
-
-    Valgrind: "Рентгеновский аппарат" для твоей памяти. Этот инструмент находит утечки памяти и другие проблемы с некорректной работой с памятью, о которых компилятор тебе никогда не скажет. Это одно из главных преимуществ разработки под Linux.
-
-    Clang-Tidy / Cppcheck: Статические анализаторы. Они "читают" твой код и находят потенциальные ошибки, баги и места, которые не соответствуют современным стандартам C++, еще до компиляции.
-
-*/
+- [ ] **Complex Modules**:
+  - [ ] Develop more interactive states like a "Notes" app (handling text input).
+  - [ ] Implement a "Timer/Stopwatch" module.
+- [ ] **Analysis & Debugging Tools**:
+  - [ ] Memory leak detection using `Valgrind`.
+  - [ ] Static code analysis with `clang-tidy` (revisit).
+- [ ] ... (More to be added as we progress)
