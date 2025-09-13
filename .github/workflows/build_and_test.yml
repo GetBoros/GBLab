@@ -1,0 +1,42 @@
+# Имя нашего workflow. Оно будет отображаться на GitHub.
+name: C++ CI
+
+# Триггеры: когда запускать этот workflow.
+on:
+  push: # Запускать при каждом push в любую ветку
+    branches: [ "**" ]
+  pull_request: # Запускать при создании pull request'а в любую ветку
+    branches: [ "**" ]
+
+# Работы (jobs), которые нужно выполнить. У нас будет одна работа 'build'.
+jobs:
+  build:
+    # На какой виртуальной машине запускать. Мы выбираем последнюю Ubuntu.
+    runs-on: ubuntu-latest
+
+    # Шаги (steps), которые нужно выполнить последовательно.
+    steps:
+    # Шаг 1: Устанавливаем зависимости, которые нужны для сборки raylib.
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgl1-mesa-dev libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev libxfixes-dev
+
+    # Шаг 2: Скачиваем наш код из репозитория на виртуальную машину.
+    # 'actions/checkout@v4' - это готовый "скрипт" от GitHub, который делает 'git clone'.
+    - name: Check out repository
+      uses: actions/checkout@v4
+
+    # Шаг 3: Конфигурируем проект с помощью CMake.
+    - name: Configure CMake
+      run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+
+    # Шаг 4: Собираем проект.
+    - name: Build
+      run: cmake --build build
+
+    # Шаг 5: Запускаем тесты.
+    - name: Test
+      run: |
+        cd build
+        ctest --output-on-failure
