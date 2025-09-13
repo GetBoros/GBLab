@@ -6,14 +6,19 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_FETCHCONTENT_SOURCE_DIR_FETCHCONTENT ${CMAKE_BINARY_DIR}/fetchcontent)
-#-------------------------------------------------------------------------------------------------------------
 
-# --- Проверки зависимостей ---
-find_package(X11 REQUIRED)
+# --- AddressSanitizer (ASan) Configuration ---
+# Мы хотим использовать ASan только в Debug-сборках, чтобы не замедлять релиз.
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    # Добавляем флаги компилятора. "-g" обязателен для получения номеров строк в отчетах.
+    add_compile_options(-fsanitize=address -g)
+    # Добавляем флаги компоновщика (linker).
+    add_link_options(-fsanitize=address)
+endif()
 #-------------------------------------------------------------------------------------------------------------
-
-# --- Подключение внешних библиотек ---
-include(FetchContent)
+find_package(X11 REQUIRED)  # --- Проверки зависимостей ---
+#-------------------------------------------------------------------------------------------------------------
+include(FetchContent)  # --- Подключение внешних библиотек ---
 
 FetchContent_Declare(
   raylib
@@ -36,10 +41,7 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(raylib googletest json)
 #-------------------------------------------------------------------------------------------------------------
-
-# === ШАГ 1: Создаем статическую библиотеку GBLabCore, содержащую всё наше "ядро" ===
-
-file(GLOB_RECURSE CORE_SOURCES 
+file(GLOB_RECURSE CORE_SOURCES  # Создаем статическую библиотеку GBLabCore, содержащую всё наше "ядро"
     "src/Components/*.cpp"
     "src/Core/*.cpp"
     "src/Core/Config/*.cpp"
@@ -54,19 +56,13 @@ target_link_libraries(GBLabCore PUBLIC raylib nlohmann_json::nlohmann_json)
 
 # ИСПРАВЛЕНИЕ: Макрос теперь привязан к GBLabCore, так как код, его использующий, живет здесь.
 target_compile_definitions(GBLabCore PUBLIC "ASSETS_PATH=\"${CMAKE_SOURCE_DIR}/assets\"")
-
 #-------------------------------------------------------------------------------------------------------------
+add_executable(HelloWorld src/main.cpp)  # === ШАГ 2: Создаем основное приложение HelloWorld ===
 
-# === ШАГ 2: Создаем основное приложение HelloWorld ===
-
-add_executable(HelloWorld src/main.cpp)
 target_link_libraries(HelloWorld PRIVATE GBLabCore)
-# Старая строка с target_compile_definitions отсюда УДАЛЕНА, так как она "переехала" выше.
-
 #-------------------------------------------------------------------------------------------------------------
+enable_testing()  # === ШАГ 3: Создаем тестовое приложение runTests ===
 
-# === ШАГ 3: Создаем тестовое приложение runTests ===
-enable_testing()
 add_executable(runTests tests/main_test.cpp)
 target_link_libraries(runTests PRIVATE gtest_main GBLabCore)
 

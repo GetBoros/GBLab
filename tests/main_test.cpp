@@ -35,3 +35,16 @@ TEST(AsToolsTests, ColorLerpWorks)
     result = AsTools::ColorLerp(transparent_black, opaque_black, 0.25f);
     EXPECT_EQ(result.a, 63);  // (0 + (255-0) * 0.25) = 63.75, кастуется к 63
 }
+
+// Этот тест специально написан с ошибкой, чтобы продемонстрировать ASan
+// TEST(ASanDeathTest, BufferOverflow)
+// {
+//     int my_array[5] = {1, 2, 3, 4, 5};
+
+//     // ОШИБКА: Допустимые индексы от 0 до 4. Мы пишем в 5-й элемент.
+//     // Это классическое переполнение буфера на стеке (stack buffer overflow).
+//     my_array[5] = 42;
+
+//     // Добавим ассерт, чтобы тест имел "цель", хотя он упадет раньше.
+//     EXPECT_EQ(my_array[0], 1);
+// }
