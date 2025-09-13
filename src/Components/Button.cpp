@@ -17,6 +17,7 @@ Button::Button(Rectangle bounds, std::string text, int textSize, const Font& fon
       _currentColor(_baseColor),
       _animationSpeed(8.0f),
       _isHovered(false),
+      _wasHovered(false),
       _isClicked(false)
 {
 }
@@ -24,17 +25,28 @@ Button::Button(Rectangle bounds, std::string text, int textSize, const Font& fon
 void Button::Update()
 {
     _isClicked = false;
+
+    // 1. Узнаем текущее состояние наведения
     _isHovered = CheckCollisionPointRec(GetMousePosition(), _bounds);
 
+    // 2. СРАВНИВАЕМ текущее состояние с состоянием из прошлого кадра
+    if (_isHovered != _wasHovered)
+    {
+        // Если состояние изменилось, здесь мы можем поставить Logpoint!
+        // Это сработает ТОЛЬКО ОДИН РАЗ в момент наведения или ухода курсора.
+    }
+
+    // Логика клика остается без изменений
     if (_isHovered && IsMouseButtonReleased(MOUSE_LEFT_BUTTON))
     {
         _isClicked = true;
     }
 
     Color targetColor = _isHovered ? _hoverColor : _baseColor;
-
-    // Вызываем нашу новую, централизованную функцию из AsTools!
     _currentColor = AsTools::ColorLerp(_currentColor, targetColor, _animationSpeed * GetFrameTime());
+
+    // 3. В САМОМ КОНЦЕ, "запоминаем" текущее состояние для следующего кадра
+    _wasHovered = _isHovered;
 }
 
 void Button::Draw() const

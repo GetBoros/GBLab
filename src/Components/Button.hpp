@@ -41,5 +41,6 @@ private:
     Color _currentColor;    // Текущий, анимируемый цвет фона
     float _animationSpeed;  // Скорость анимации
     bool _isHovered;        // Флаг наведения
+    bool _wasHovered;       // Был ли курсор наведен на кнопку в ПРОШЛОМ кадре? <-- ДОБАВЬ ЭТО
     bool _isClicked;        // Флаг клика
 };
